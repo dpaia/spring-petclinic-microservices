@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.vets.web;
 
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ class VetResourceTest {
 
     @MockBean
     VetRepository vetRepository;
+
+    @MockBean
+    private Tracer tracer;
 
     @Test
     void shouldGetAListOfVets() throws Exception {

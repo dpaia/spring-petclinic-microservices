@@ -16,6 +16,8 @@
 package org.springframework.samples.petclinic.customers.web;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.Span;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.slf4j.Logger;
@@ -45,10 +47,12 @@ class OwnerResource {
 
     private final OwnerRepository ownerRepository;
     private final OwnerEntityMapper ownerEntityMapper;
+    private final Tracer tracer;
 
-    OwnerResource(OwnerRepository ownerRepository, OwnerEntityMapper ownerEntityMapper) {
+    OwnerResource(OwnerRepository ownerRepository, OwnerEntityMapper ownerEntityMapper, Tracer tracer) {
         this.ownerRepository = ownerRepository;
         this.ownerEntityMapper = ownerEntityMapper;
+        this.tracer = tracer;
     }
 
     /**
@@ -57,6 +61,14 @@ class OwnerResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Owner createOwner(@Valid @RequestBody OwnerRequest ownerRequest) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Creating new owner, traceId: {}, spanId: {}", traceId, spanId);
+        } else {
+            log.info("Creating new owner, no current span found");
+        }
         Owner owner = ownerEntityMapper.map(new Owner(), ownerRequest);
         return ownerRepository.save(owner);
     }
@@ -66,6 +78,14 @@ class OwnerResource {
      */
     @GetMapping(value = "/{ownerId}")
     public Optional<Owner> findOwner(@PathVariable("ownerId") @Min(1) int ownerId) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Finding owner with ID: {}, traceId: {}, spanId: {}", ownerId, traceId, spanId);
+        } else {
+            log.info("Finding owner with ID: {}, no current span found", ownerId);
+        }
         return ownerRepository.findById(ownerId);
     }
 
@@ -83,6 +103,15 @@ class OwnerResource {
     @PutMapping(value = "/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOwner(@PathVariable("ownerId") @Min(1) int ownerId, @Valid @RequestBody OwnerRequest ownerRequest) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Updating owner with ID: {}, traceId: {}, spanId: {}", ownerId, traceId, spanId);
+        } else {
+            log.info("Updating owner with ID: {}, no current span found", ownerId);
+        }
+
         final Owner ownerModel = ownerRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner " + ownerId + " not found"));
 
         ownerEntityMapper.map(ownerModel, ownerRequest);

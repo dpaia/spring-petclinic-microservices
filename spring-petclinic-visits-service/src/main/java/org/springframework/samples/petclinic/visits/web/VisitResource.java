@@ -20,6 +20,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -48,9 +50,11 @@ class VisitResource {
     private static final Logger log = LoggerFactory.getLogger(VisitResource.class);
 
     private final VisitRepository visitRepository;
+    private final Tracer tracer;
 
-    VisitResource(VisitRepository visitRepository) {
+    VisitResource(VisitRepository visitRepository, Tracer tracer) {
         this.visitRepository = visitRepository;
+        this.tracer = tracer;
     }
 
     @PostMapping("owners/*/pets/{petId}/visits")
@@ -59,6 +63,15 @@ class VisitResource {
         @Valid @RequestBody Visit visit,
         @PathVariable("petId") @Min(1) int petId) {
 
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Creating visit for pet ID: {}, traceId: {}, spanId: {}", petId, traceId, spanId);
+        } else {
+            log.info("Creating visit for pet ID: {}, no current span found", petId);
+        }
+
         visit.setPetId(petId);
         log.info("Saving visit {}", visit);
         return visitRepository.save(visit);
@@ -66,11 +79,27 @@ class VisitResource {
 
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> read(@PathVariable("petId") @Min(1) int petId) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Finding visits for pet ID: {}, traceId: {}, spanId: {}", petId, traceId, spanId);
+        } else {
+            log.info("Finding visits for pet ID: {}, no current span found", petId);
+        }
         return visitRepository.findByPetId(petId);
     }
 
     @GetMapping("pets/visits")
     public Visits read(@RequestParam("petId") List<Integer> petIds) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Finding visits for pet IDs: {}, traceId: {}, spanId: {}", petIds, traceId, spanId);
+        } else {
+            log.info("Finding visits for pet IDs: {}, no current span found", petIds);
+        }
         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
         return new Visits(byPetIdIn);
     }

@@ -168,6 +168,18 @@ ENV SPRING_PROFILES_ACTIVE docker,mysql
 In the `mysql section` of the `application.yml` from the [Configuration repository], you have to change 
 the host and port of your MySQL JDBC connection string. 
 
+## Distributed Tracing
+
+All services are configured with Micrometer Tracing and Zipkin for distributed tracing. Each HTTP request is automatically assigned a trace ID and span ID, which are logged in the format:
+
+```
+traceId=<value> spanId=<value>
+```
+
+This enables tracking requests as they flow through multiple microservices. Trace context is propagated via W3C Trace Context headers (`traceparent`).
+
+To view traces, access Zipkin at http://localhost:9411/zipkin/ after starting the services.
+
 ## Custom metrics monitoring
 
 Grafana and Prometheus are included in the `docker-compose.yml` configuration, and the public facing applications

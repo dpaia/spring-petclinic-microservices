@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.customers.web;
 
 import java.util.Optional;
 
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ class PetResourceTest {
 
     @MockBean
     OwnerRepository ownerRepository;
+
+    @MockBean
+    Tracer tracer;
 
     @Test
     void shouldGetAPetInJSonFormat() throws Exception {

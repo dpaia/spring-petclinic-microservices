@@ -47,6 +47,9 @@ class VetResourceTest {
     @MockBean
     VetRepository vetRepository;
 
+    @MockBean
+    io.micrometer.tracing.Tracer tracer;
+
     @Test
     void shouldGetAListOfVets() throws Exception {
 

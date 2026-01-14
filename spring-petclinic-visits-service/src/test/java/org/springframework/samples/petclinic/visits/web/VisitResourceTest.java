@@ -29,6 +29,9 @@ class VisitResourceTest {
     @MockBean
     VisitRepository visitRepository;
 
+    @MockBean
+    io.micrometer.tracing.Tracer tracer;
+
     @Test
     void shouldFetchVisits() throws Exception {
         given(visitRepository.findByPetIdIn(asList(111, 222)))

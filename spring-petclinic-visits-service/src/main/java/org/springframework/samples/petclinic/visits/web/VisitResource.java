@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -48,9 +49,11 @@ class VisitResource {
     private static final Logger log = LoggerFactory.getLogger(VisitResource.class);
 
     private final VisitRepository visitRepository;
+    private final Tracer tracer;
 
-    VisitResource(VisitRepository visitRepository) {
+    VisitResource(VisitRepository visitRepository, Tracer tracer) {
         this.visitRepository = visitRepository;
+        this.tracer = tracer;
     }
 
     @PostMapping("owners/*/pets/{petId}/visits")
@@ -59,6 +62,10 @@ class VisitResource {
         @Valid @RequestBody Visit visit,
         @PathVariable("petId") @Min(1) int petId) {
 
+        String traceId = tracer.currentSpan() != null ? tracer.currentSpan().context().traceId() : "unknown";
+        String spanId = tracer.currentSpan() != null ? tracer.currentSpan().context().spanId() : "unknown";
+        log.info("Creating visit for pet ID {} - traceId={} spanId={}", petId, traceId, spanId);
+
         visit.setPetId(petId);
         log.info("Saving visit {}", visit);
         return visitRepository.save(visit);
@@ -66,11 +73,19 @@ class VisitResource {
 
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> read(@PathVariable("petId") @Min(1) int petId) {
+        String traceId = tracer.currentSpan() != null ? tracer.currentSpan().context().traceId() : "unknown";
+        String spanId = tracer.currentSpan() != null ? tracer.currentSpan().context().spanId() : "unknown";
+        log.info("Getting visits for pet ID {} - traceId={} spanId={}", petId, traceId, spanId);
+        
         return visitRepository.findByPetId(petId);
     }
 
     @GetMapping("pets/visits")
     public Visits read(@RequestParam("petId") List<Integer> petIds) {
+        String traceId = tracer.currentSpan() != null ? tracer.currentSpan().context().traceId() : "unknown";
+        String spanId = tracer.currentSpan() != null ? tracer.currentSpan().context().spanId() : "unknown";
+        log.info("Getting visits for pet IDs {} - traceId={} spanId={}", petIds, traceId, spanId);
+        
         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
         return new Visits(byPetIdIn);
     }

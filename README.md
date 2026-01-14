@@ -200,6 +200,110 @@ All those three REST controllers `OwnerResource`, `PetResource` and `VisitResour
 * `visits-service` application has the following custom metrics enabled:
   * @Timed: `petclinic.visit`
 
+## Distributed Tracing
+
+The Spring PetClinic microservices application includes comprehensive distributed tracing capabilities using **Micrometer Tracing** with **Brave** and **Zipkin**. This enables request tracking across multiple services, providing valuable insights into request flow and performance.
+
+### Tracing Implementation
+
+**Every HTTP request** to the target services (Customers, Vets, Visits) has an active trace with trace ID and span ID logging:
+
+- **Customers Service** (`spring-petclinic-customers-service`):
+  - Owner management endpoints (create, read, update, list)
+  - Pet management endpoints (create, read, update, get types)
+- **Vets Service** (`spring-petclinic-vets-service`):
+  - Veterinarian listing endpoint
+- **Visits Service** (`spring-petclinic-visits-service`):
+  - Visit creation and retrieval endpoints
+
+**Complete Coverage**: All REST endpoints in these services are instrumented to ensure no request goes untraced.
+
+### Log Format
+
+Each service operation logs its trace context in the following format:
+```
+traceId=<trace_id_value> spanId=<span_id_value>
+```
+
+Example log output:
+```
+2024-01-13 19:30:15.123 INFO [customers-service,6a3e78f912ab34cd,9b8c7d6e5f4a3210]
+Creating owner - traceId=6a3e78f912ab34cd spanId=9b8c7d6e5f4a3210
+```
+
+### Dependencies
+
+The following tracing dependencies are included in all service modules:
+
+```xml
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-zipkin</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-observation</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
+```
+
+### Trace Context Propagation
+
+The implementation uses **W3C Trace Context** format for trace propagation across services:
+
+- **Header Format**: Uses the `traceparent` header for trace context propagation
+- **Standard Compliance**: Follows W3C Trace Context specification
+- **Default in Spring Boot 3**: W3C format is the default tracing format in Spring Boot 3.x
+- **Cross-Service Tracking**: Enables seamless trace propagation between microservices
+
+### Zipkin Integration
+
+Traces are exported to Zipkin for visualization and analysis:
+
+- **Zipkin UI**: Available at http://localhost:9411/zipkin/ when running locally
+- **Trace Visualization**: View complete request traces across all microservices
+- **Performance Analysis**: Identify bottlenecks and latency issues
+- **Service Dependencies**: Understand service interaction patterns
+
+### Validation and Testing
+
+An integration test ([`TracingIntegrationTest.java`](spring-petclinic-customers-service/src/test/java/org/springframework/samples/petclinic/customers/web/TracingIntegrationTest.java)) verifies that:
+
+1. Trace contexts are properly created for each request
+2. Trace IDs and span IDs are correctly logged
+3. Tracing infrastructure is properly configured
+4. Trace propagation works across service operations
+
+### Running with Tracing
+
+To enable full tracing capabilities:
+
+1. **Start Zipkin server** (included in docker-compose):
+   ```bash
+   docker compose up zipkin
+   ```
+
+2. **Start the microservices** with tracing enabled (default configuration)
+
+3. **Generate some traffic** by using the application or running the integration tests
+
+4. **View traces** in Zipkin UI at http://localhost:9411/zipkin/
+
+### Benefits
+
+- **Request Tracking**: Follow requests as they flow through multiple microservices
+- **Performance Monitoring**: Identify slow operations and bottlenecks
+- **Error Diagnosis**: Correlate errors across service boundaries
+- **Service Dependencies**: Visualize how services interact
+- **Debugging**: Easier troubleshooting with correlated logs and traces
+
 ## Looking for something in particular?
 
 | Spring Cloud components         | Resources  |

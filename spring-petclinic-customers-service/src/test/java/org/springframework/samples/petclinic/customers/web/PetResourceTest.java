@@ -41,6 +41,9 @@ class PetResourceTest {
     @MockBean
     OwnerRepository ownerRepository;
 
+    @MockBean
+    io.micrometer.tracing.Tracer tracer;
+
     @Test
     void shouldGetAPetInJSonFormat() throws Exception {
 

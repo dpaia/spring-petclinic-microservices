@@ -15,11 +15,14 @@
  */
 package org.springframework.samples.petclinic.api.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.samples.petclinic.api.dto.Visits;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -30,8 +33,11 @@ import static java.util.stream.Collectors.joining;
 @Component
 public class VisitsServiceClient {
 
+    private static final Logger log = LoggerFactory.getLogger(VisitsServiceClient.class);
+
     // Could be changed for testing purpose
     private String hostname = "http://visits-service/";
+    private Duration timeout = Duration.ofSeconds(1);
 
     private final WebClient.Builder webClientBuilder;
 
@@ -44,7 +50,10 @@ public class VisitsServiceClient {
             .get()
             .uri(hostname + "pets/visits?petId={petId}", joinIds(petIds))
             .retrieve()
-            .bodyToMono(Visits.class);
+            .bodyToMono(Visits.class)
+            .timeout(timeout)
+            .doOnError(throwable ->
+                log.error("Error retrieving visits for pets {}: {}", petIds, throwable.getMessage()));
     }
 
     private String joinIds(List<Integer> petIds) {
@@ -53,5 +62,9 @@ public class VisitsServiceClient {
 
     void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+
+    void setTimeout(Duration timeout) {
+        this.timeout = timeout;
     }
 }

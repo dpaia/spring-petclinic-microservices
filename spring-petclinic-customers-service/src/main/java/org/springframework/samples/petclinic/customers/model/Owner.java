@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.samples.petclinic.customers.validation.ValidAddress;
 
 import java.util.*;
 
@@ -52,6 +53,7 @@ public class Owner {
 
     @Column(name = "address")
     @NotBlank
+    @ValidAddress
     private String address;
 
     @Column(name = "city")

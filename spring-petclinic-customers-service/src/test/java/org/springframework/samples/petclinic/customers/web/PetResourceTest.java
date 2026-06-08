@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,6 +38,11 @@ class PetResourceTest {
 
     @MockBean
     private Tracer tracer;
+
+    @Test
+    void shouldDeclareTracerDependency() throws Exception {
+        assertEquals(Tracer.class, PetResource.class.getDeclaredField("tracer").getType());
+    }
 
     @Test
     void shouldGetAPetInJSonFormat() throws Exception {

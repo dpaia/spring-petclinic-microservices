@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +33,11 @@ class VisitResourceTest {
 
     @MockBean
     private Tracer tracer;
+
+    @Test
+    void shouldDeclareTracerDependency() throws Exception {
+        assertEquals(Tracer.class, VisitResource.class.getDeclaredField("tracer").getType());
+    }
 
     @Test
     void shouldFetchVisits() throws Exception {

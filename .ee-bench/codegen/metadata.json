@@ -6,10 +6,9 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "spring-petclinic-api-gateway:org.springframework.samples.petclinic.api.tracing.TracingIntegrationTest",
-      "spring-petclinic-customers-service:org.springframework.samples.petclinic.customers.web.PetResourceTest",
-      "spring-petclinic-vets-service:org.springframework.samples.petclinic.vets.web.VetResourceTest",
-      "spring-petclinic-visits-service:org.springframework.samples.petclinic.visits.web.VisitResourceTest"
+      "spring-petclinic-customers-service:org.springframework.samples.petclinic.customers.web.PetResourceTest.shouldDeclareTracerDependency",
+      "spring-petclinic-vets-service:org.springframework.samples.petclinic.vets.web.VetResourceTest.shouldDeclareTracerDependency",
+      "spring-petclinic-visits-service:org.springframework.samples.petclinic.visits.web.VisitResourceTest.shouldDeclareTracerDependency"
     ],
     "pass_to_pass": []
   },

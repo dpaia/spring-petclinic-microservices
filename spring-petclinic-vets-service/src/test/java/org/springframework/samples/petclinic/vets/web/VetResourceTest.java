@@ -29,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +51,11 @@ class VetResourceTest {
 
     @MockBean
     private Tracer tracer;
+
+    @Test
+    void shouldDeclareTracerDependency() throws Exception {
+        assertEquals(Tracer.class, VetResource.class.getDeclaredField("tracer").getType());
+    }
 
     @Test
     void shouldGetAListOfVets() throws Exception {

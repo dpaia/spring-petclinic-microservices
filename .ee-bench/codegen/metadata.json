@@ -5,7 +5,10 @@
   "jvm_version": "17",
   "build_system": "maven",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "spring-petclinic-api-gateway:org.springframework.samples.petclinic.api.application.VisitsServiceClientWireMockTest",
+      "spring-petclinic-api-gateway:org.springframework.samples.petclinic.api.application.VisitsServiceSpringBootWireMockTest"
+    ],
     "pass_to_pass": []
   },
   "environment": {

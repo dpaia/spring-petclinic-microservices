@@ -1,2 +1,33 @@
-spring.cloud.config.enabled: false
-eureka.client.enabled: false
+spring:
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
+
+# Disable Eureka client
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+# Logging configuration for tests
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.samples.petclinic: DEBUG
+    # WireMock logging
+    com.github.tomakehurst.wiremock: DEBUG
+
+# Circuit breaker configuration for tests
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s

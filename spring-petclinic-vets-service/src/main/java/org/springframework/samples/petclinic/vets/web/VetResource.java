@@ -17,6 +17,10 @@ package org.springframework.samples.petclinic.vets.web;
 
 import java.util.List;
 
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.Span;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.samples.petclinic.vets.model.Vet;
 import org.springframework.samples.petclinic.vets.model.VetRepository;
@@ -35,15 +39,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class VetResource {
 
-    private final VetRepository vetRepository;
+    private static final Logger log = LoggerFactory.getLogger(VetResource.class);
 
-    VetResource(VetRepository vetRepository) {
+    private final VetRepository vetRepository;
+    private final Tracer tracer;
+
+    VetResource(VetRepository vetRepository, Tracer tracer) {
         this.vetRepository = vetRepository;
+        this.tracer = tracer;
     }
 
     @GetMapping
     @Cacheable("vets")
     public List<Vet> showResourcesVetList() {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Retrieving all vets, traceId: {}, spanId: {}", traceId, spanId);
+        } else {
+            log.info("Retrieving all vets, no current span found");
+        }
         return vetRepository.findAll();
     }
 }

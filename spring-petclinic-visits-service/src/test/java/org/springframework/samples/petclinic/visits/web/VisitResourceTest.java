@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.visits.web;
 
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ class VisitResourceTest {
 
     @MockBean
     VisitRepository visitRepository;
+
+    @MockBean
+    private Tracer tracer;
 
     @Test
     void shouldFetchVisits() throws Exception {

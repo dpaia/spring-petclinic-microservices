@@ -16,6 +16,8 @@
 package org.springframework.samples.petclinic.customers.web;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.Span;
 import jakarta.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +42,12 @@ class PetResource {
 
     private final PetRepository petRepository;
     private final OwnerRepository ownerRepository;
+    private final Tracer tracer;
 
-    PetResource(PetRepository petRepository, OwnerRepository ownerRepository) {
+    PetResource(PetRepository petRepository, OwnerRepository ownerRepository, Tracer tracer) {
         this.petRepository = petRepository;
         this.ownerRepository = ownerRepository;
+        this.tracer = tracer;
     }
 
     @GetMapping("/petTypes")
@@ -57,6 +61,15 @@ class PetResource {
         @RequestBody PetRequest petRequest,
         @PathVariable("ownerId") @Min(1) int ownerId) {
 
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Creating pet for owner ID: {}, traceId: {}, spanId: {}", ownerId, traceId, spanId);
+        } else {
+            log.info("Creating pet for owner ID: {}, no current span found", ownerId);
+        }
+
         Owner owner = ownerRepository.findById(ownerId)
             .orElseThrow(() -> new ResourceNotFoundException("Owner " + ownerId + " not found"));
 
@@ -69,6 +82,16 @@ class PetResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void processUpdateForm(@RequestBody PetRequest petRequest) {
         int petId = petRequest.id();
+
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Updating pet with ID: {}, traceId: {}, spanId: {}", petId, traceId, spanId);
+        } else {
+            log.info("Updating pet with ID: {}, no current span found", petId);
+        }
+
         Pet pet = findPetById(petId);
         save(pet, petRequest);
     }
@@ -87,6 +110,14 @@ class PetResource {
 
     @GetMapping("owners/*/pets/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            String traceId = currentSpan.context().traceId();
+            String spanId = currentSpan.context().spanId();
+            log.info("Finding pet with ID: {}, traceId: {}, spanId: {}", petId, traceId, spanId);
+        } else {
+            log.info("Finding pet with ID: {}, no current span found", petId);
+        }
         Pet pet = findPetById(petId);
         return new PetDetails(pet);
     }
